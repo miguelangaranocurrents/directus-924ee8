@@ -1,3 +1,9 @@
+// The global tooltip is force-mounted, so its popper wrapper stays positioned over the last
+// tooltip target even when closed. It must never block clicks on the elements underneath.
+[data-reka-popper-content-wrapper]:has(> .tooltip) {
+	pointer-events: none;
+}
+
 .tooltip {
 	--tooltip-foreground-color: var(--foreground-inverted);
 	--tooltip-background-color: var(--background-inverted);

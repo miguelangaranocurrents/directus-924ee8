@@ -66,6 +66,28 @@ const {
 	onUpdate: (value) => emit('update:modelValue', value),
 });
 
+type WeekDay = 0 | 1 | 2 | 3 | 4 | 5 | 6;
+
+/**
+ * First day of the week for the user's locale (0 = Sunday), based on Intl week info when available.
+ */
+const weekStartsOn = computed<WeekDay>(() => {
+	try {
+		const locale = new Intl.Locale(userStore.language) as Intl.Locale & {
+			getWeekInfo?: () => { firstDay: number };
+			weekInfo?: { firstDay: number };
+		};
+
+		const firstDay = locale.getWeekInfo?.().firstDay ?? locale.weekInfo?.firstDay;
+
+		if (typeof firstDay === 'number') return (firstDay % 7) as WeekDay;
+	} catch {
+		// Fall through to default
+	}
+
+	return 0;
+});
+
 const monthFormatter = computed(() => {
 	// Use 'long' for “January”, 'short' for “Jan”, 'narrow' for “J”
 	// timeZone: 'UTC' ensures the month name matches the UTC date created by `toDate('UTC')` below,
@@ -154,6 +176,8 @@ function setToNow() {
 			v-slot="{ weekDays, grid, date }"
 			:model-value="calendarValue"
 			:disabled="disabled"
+			:locale="userStore.language"
+			:week-starts-on="weekStartsOn"
 			class="calendar"
 			fixed-weeks
 			weekday-format="short"
